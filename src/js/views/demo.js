@@ -6,38 +6,72 @@ import { Context } from "../store/appContext";
 import "../../styles/demo.css";
 
 export const Demo = () => {
-	const { store, actions } = useContext(Context);
+  const { store, actions } = useContext(Context);
 
-	return (
-		<div className="container">
-			<ul className="list-group">
-				{store.demo.map((item, index) => {
-					return (
-						<li
-							key={index}
-							className="list-group-item d-flex justify-content-between"
-							style={{ background: item.background }}>
-							<Link to={"/single/" + index}>
-								<span>Link to: {item.title}</span>
-							</Link>
-							{// Conditional render example
-							// Check to see if the background is orange, if so, display the message
-							item.background === "orange" ? (
-								<p style={{ color: item.initial }}>
-									Check store/flux.js scroll to the actions to see the code
-								</p>
-							) : null}
-							<button className="btn btn-success" onClick={() => actions.changeColor(index, "orange")}>
-								Change Color
-							</button>
-						</li>
-					);
-				})}
-			</ul>
-			<br />
-			<Link to="/">
-				<button className="btn btn-primary">Back home</button>
-			</Link>
-		</div>
-	);
+  return (
+    <div className="container">
+      <div className="row justify-content-center">
+        <div className="col-8 text-center">
+          <h1 className="display-3" id="title">
+            todos
+          </h1>
+        </div>
+      </div>
+      <div className="row justify-content-center">
+        <div className="col-8 text-center">
+          <ul className="list-group-items">
+            <li key="li-1" className="list-group item">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                }}
+              >
+                <input
+                  type="text"
+                  className="input-group form-control"
+                  placeholder="Que tareas deseas agregar?"
+                  onKeyDown={(e) => actions.addList(e)}
+                />
+              </form>
+            </li>
+            {store.todoList.map((item, index) => {
+              return (
+                <li
+                  key={`"li${index}"`}
+                  className="list-group-item shadow text-left pl-5"
+                >
+                  {item.label}
+                  <span
+                    id={`"${index}"`}
+                    onClick={() => actions.deleteTask(index)}
+                    className="fas fa-trash"
+                  ></span>
+                </li>
+              );
+            })}
+            <li className="list-group-item shadow list-group-item-light text-left pl-3 min-size">
+              {store.todoList.length} item
+              {store.todoList.length === 1 ? "" : "s"} left
+            </li>
+            {/* <li
+              className="list-group-item shadow list-group-item-light m-auto p-1"
+              style={{ width: "98%" }}
+            ></li>
+            <li
+              className="list-group-item shadow list-group-item-light m-auto p-1"
+              style={{ width: "96%" }}
+            ></li> */}
+          </ul>
+          {
+            <button
+              className="btn shadow btn-danger"
+              onClick={() => actions.deleteAll()}
+            >
+              Delete All
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  );
 };

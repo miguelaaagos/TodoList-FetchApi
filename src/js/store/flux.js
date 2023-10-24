@@ -1,45 +1,71 @@
 const getState = ({ getStore, getActions, setStore }) => {
-	return {
-		store: {
-			demo: [
-				{
-					title: "FIRST",
-					background: "white",
-					initial: "white"
-				},
-				{
-					title: "SECOND",
-					background: "white",
-					initial: "white"
-				}
-			]
-		},
-		actions: {
-			// Use getActions to call a function within a fuction
-			exampleFunction: () => {
-				getActions().changeColor(0, "green");
-			},
-			loadSomeData: () => {
-				/**
-					fetch().then().then(data => setStore({ "foo": data.bar }))
-				*/
-			},
-			changeColor: (index, color) => {
-				//get the store
-				const store = getStore();
+  return {
+    store: { todoList: [{ label: "", done: false }] },
+    actions: {
+      createUser: () => {
+        fetch("https://assets.breatheco.de/apis/fake/todos/user/miguee", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify([]),
+        });
+      },
 
-				//we have to loop the entire demo array to look for the respective index
-				//and change its color
-				const demo = store.demo.map((elm, i) => {
-					if (i === index) elm.background = color;
-					return elm;
-				});
+      getData: () => {
+        fetch("https://assets.breatheco.de/apis/fake/todos/user/miguee", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        })
+          .then((data) => data.json())
+          .then((request) => {
+            if (request.msg) {
+              setStore({ todoList: [{ label: "", done: false }] });
+              getActions().createUser();
+            } else setStore({ todoList: request });
+          });
+      },
+      updateApi: () => {
+        fetch("https://assets.breatheco.de/apis/fake/todos/user/miguee", {
+          method: "PUT",
+          body: JSON.stringify(getStore().todoList),
+          headers: { "Content-Type": "application/json" },
+        })
+          .then((request) => request.json())
+          .then((data) => {
+            console.log("resultado del fetch :", data);
+          });
+      },
 
-				//reset the global store
-				setStore({ demo: demo });
-			}
-		}
-	};
+      addList: (event) => {
+        if (event.target.value !== "" && event.key === "Enter") {
+          setStore({
+            todoList: getStore().todoList.concat({
+              label: `${event.target.value}`,
+              done: false,
+            }),
+          });
+          event.target.value = "";
+          getActions().updateApi();
+          event.preventDefault();
+        }
+      },
+
+      deleteTask: (toErase) => {
+        if (getStore().todoList.length === 1) {
+          setStore({ todoList: [] });
+          getActions().updateApi();
+        }
+        const filterData = getStore().todoList.filter(
+          (item, index) => index !== toErase
+        );
+        setStore({ todoList: filterData });
+        getActions().updateApi();
+      },
+
+      deleteAll: () => {
+        setStore({ todoList: [] });
+        getActions().updateApi();
+      },
+    },
+  };
 };
-
 export default getState;
